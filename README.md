@@ -36,10 +36,50 @@ For the problem of face detection and personalized ID card creation, a model tha
 ### Face Detection
 The model starts with an image containing faces, converts it into a blob for the pre-trained DNN to detect them, and then draws bounding boxes around them. The DNN then provides the coordinates of these boxes, indicating the location of faces in the image.
 
-```net = cv2.dnn.readNetFromCaffe(configFile, modelFile)
-blob = cv2.dnn.blobFromImage(cv2.resize(image, (300, 300)), 1.0, (300, 300), (104.0, 177.0, 123.0))
-net.setInput(blob)
-detections = net.forward()
+```def detect_face_dnn(image_path):
+    # Load the DNN model
+    net = cv2.dnn.readNetFromCaffe(configFile, modelFile)
+
+    # Read the image
+    image = cv2.imread(image_path)
+    if image is None:
+        print("Error: Image not found")
+        return None
+
+    (h, w) = image.shape[:2]
+
+    # Create blob from image
+    blob = cv2.dnn.blobFromImage(cv2.resize(image, (300, 300)), 1.0, (300, 300), (104.0, 177.0, 123.0))
+
+    # Set the blob as input to the network
+    net.setInput(blob)
+
+    # Perform inference and get the faces
+    detections = net.forward()
+
+    # Find the face with the highest confidence
+    max_confidence = 0
+    face = None
+
+    for i in range(0, detections.shape[2]):
+        confidence = detections[0, 0, i, 2]
+
+        # Ensure the confidence is above a threshold
+        if confidence > 0.5 and confidence > max_confidence:
+            max_confidence = confidence
+            box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
+            (startX, startY, endX, endY) = box.astype("int")
+
+            padding = 100 
+            startX = max(0, startX - padding)
+            startY = max(0, startY - padding)
+            endX = min(w, endX + padding)
+            endY = min(h, endY + padding)
+
+            # Extract the face
+            face = image[startY:endY, startX:endX]
+
+    return face
 ```
 
 ### Image Cropping
@@ -47,19 +87,70 @@ The model uses bounding box coordinates from the face detection step to crop out
 
 ```box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
 (startX, startY, endX, endY) = box.astype("int")
+
+padding = 100  
+startX = max(0, startX - padding)
+startY = max(0, startY - padding)
+endX = min(w, endX + padding)
+endY = min(h, endY + padding)
+
+# Extract the face
+face = image[startY:endY, startX:endX]
+pe("int")
 face = image[startY:endY, startX:endX]
 ```
 
 ### ID Card Creation
 The model uses cropped face images and a predefined ID card template to create a personalized ID card with user-specific information, such as the user's name, using image manipulation techniques.
 
-```image = Image.fromarray(cv2.cvtColor(face_image, cv2.COLOR_BGR2RGB))
-face_pil = image.resize((290, 290), Image.Resampling.LANCZOS)
-id_template.paste(face_pil, (150, 245, 440, 535))
-draw.text((x_position, 706), name, font=font, fill='#04294f')
+```def create_id_card(face_image, name, save_path):
+    id_template = Image.open("ID Card.png")
+
+    # Convert the face image from OpenCV format to PIL format
+    image = Image.fromarray(cv2.cvtColor(face_image, cv2.COLOR_BGR2RGB))
+
+    # Resize the image using LANCZOS resampling (formerly known as ANTIALIAS)
+    face_pil = image.resize((290, 290), Image.Resampling.LANCZOS)
+
+    #(290, 290) is the size of the image panel
+    #starting point: (155, 250) end point: (435, 530) | w = 435 - 155 h = 530 - 250
+
+    # Paste the face onto the ID template
+    id_template.paste(face_pil, (150, 245, 440, 535))
+
+    # (150, 245, 440, 535) is the starting point and endpoint of the image panel of the template
+
+    # Import the font
+    font = ImageFont.truetype('glacial-indifference.bold.otf', size=23)
+    draw = ImageDraw.Draw(id_template)
+
+    # Calculate the bounding box of the text
+    text_bbox = draw.textbbox((0, 0), name, font=font)
+
+    # Calculate the width of the text
+    text_width = text_bbox[2] - text_bbox[0]
+
+    # Calculate the x-coordinate to center the text
+    x_position = (id_template.width - text_width) // 2
+
+    # Draw the text centered
+    draw.text((x_position, 706), name, font=font, fill='#04294f')
+
+    # x_position is the calculated center of the bounding box, 706 is the y_position
+
+    # Display the finished ID card
+    id_template.show()
+
+    # Save the finished ID card
+    id_template.save(save_path)
 ```
 
 The model automates face detection and ID card creation, reducing manual effort and accelerating workflow. It uses a DNN for high accuracy, maintains consistency, and operates efficiently, making it ideal for large-volume ID card production.
+
+![image](https://github.com/user-attachments/assets/e003a0e7-a513-4858-878e-3dd2529120ed)
+![image (1)](https://github.com/user-attachments/assets/7fa6003f-5d0a-4e76-92b0-e681b5c38eb5)
+![image (2)](https://github.com/user-attachments/assets/8900601c-099e-4181-8eb9-cebd54b3fa93)
+![image (3)](https://github.com/user-attachments/assets/1071d8f7-5550-4235-8fdf-d0aba3ddc233)
 
 ## Conclusion
 AI uses effective image processing to understand and interpret data in a visual format with a great deal of accuracy. An enhancement technique, object recognition, and face detection amongst others are techniques that offer an aid to various applications, which range from security and surveillance applications to automatically working photo editing of medical imagery.
