@@ -1,5 +1,7 @@
 # Machine Problem 1: Exploring the Role of Computer Vision and Image Processing in AI
 
+https://github.com/user-attachments/assets/50cad7e8-88dc-4a37-bcf1-d13563668dcb
+
 ## Introduction to Computer Vision and Image Processing
 **Computer Vision** is a branch of AI that uses sensing devices, algorithms, and deep learning to interpret and understand visual data, similar to human vision. It automates tasks like recognizing objects and detecting patterns. 
 
@@ -8,16 +10,19 @@ Its applications include content organization, text extraction, augmented realit
 Modern computer vision relies on deep learning and neural networks for improved analysis.
 
 ## Types of Image Processing Techniques
-* ### Object Detection
+### Object Detection
 Using algorithms to identify and localize specific objects within an image and create bounding boxes around them.
+
 Example: Models can accurately detect multiple objects in real-time, including people, vehicles, and animals, in surveillance videos or autonomous vehicles.
 
-* ### Image Cropping
+### Image Cropping
 Selectively extracts a specific part of an image to focus on an area of interest, removing unwanted parts while preserving the desired area.
+
 Example: Cropping a face from a group photo to use as a profile picture, or isolating a product in an image for e-commerce listings.
 
-* ### Image Manipulation
+### Image Manipulation
 Modifying an image to achieve specific visual effects, involving techniques like combining images, adding text, and modifying image attributes.
+
 Example: Using software to create collages, design marketing materials, or edit photos to adjust colors and add annotations.
 
 ## Case Study Overview
@@ -28,7 +33,7 @@ This method addresses issues of manual processing, accuracy, and efficiency, mak
 ## Image Processing Implementation
 For the problem of face detection and personalized ID card creation, a model that combines a deep neural networK for face detection with image manipulation techniques for generating ID cards is used.
 
-* ### Face Detection
+### Face Detection
 The model starts with an image containing faces, converts it into a blob for the pre-trained DNN to detect them, and then draws bounding boxes around them. The DNN then provides the coordinates of these boxes, indicating the location of faces in the image.
 
 ```net = cv2.dnn.readNetFromCaffe(configFile, modelFile)
@@ -37,7 +42,7 @@ net.setInput(blob)
 detections = net.forward()
 ```
 
-* ### Image Cropping
+### Image Cropping
 The model uses bounding box coordinates from the face detection step to crop out areas containing detected faces, resulting in isolated face images for further processing.
 
 ```box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
@@ -45,7 +50,7 @@ The model uses bounding box coordinates from the face detection step to crop out
 face = image[startY:endY, startX:endX]
 ```
 
-* ### ID Card Creation
+### ID Card Creation
 The model uses cropped face images and a predefined ID card template to create a personalized ID card with user-specific information, such as the user's name, using image manipulation techniques.
 
 ```image = Image.fromarray(cv2.cvtColor(face_image, cv2.COLOR_BGR2RGB))
@@ -68,3 +73,13 @@ This activity made me understand that image processing develops the quality and 
 SSL enables models to learn from unlabeled data by creating tasks that automatically infer important information. This method greatly reduces the time and expense associated with data labeling, making advanced AI systems more accessible and inexpensive. SSL improves model performance and generalization across multiple tasks by learning robust features from unlabeled input. It also accelerates the training process, especially in fields where data labeling is difficult or expensive. SSL approaches are extensively applicable, increasing the efficiency and capability of AI models in both natural language processing and computer vision. 
 
 Overall, SSL is a significant improvement in AI, promising to improve performance, lower costs, and speed up the creation of future AI systems.
+
+## References
+What is Computer Vision? | Microsoft Azure. (n.d.). https://azure.microsoft.com/en-us/resources/cloud-computing-dictionary/what-is-computer-vision#object-classification
+
+Simplilearn. (2024, August 13). What is image processing : overview, applications, benefits, and more. Simplilearn.com. https://www.simplilearn.com/image-processing-article#types_of_image_processing
+
+Kundu, R. (2024, July 25). Image Processing: Techniques, Types, & Applications [2024]. V7. https://www.v7labs.com/blog/image-processing-guide#image-processing-techniques
+
+What is Self-Supervised Learning? | IBM. (n.d.). https://www.ibm.com/topics/self-supervised-learning
+
